@@ -150,17 +150,17 @@ Resources:
   DMSIAMRoles:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: dms-roles.template
+      TemplateURL: dms-roles.yaml
       TimeoutInMinutes: 10
 
   VPCNetwork0:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: network.template
+      TemplateURL: network.yaml
       TimeoutInMinutes: 20
       Parameters:
         AvailabilityZones: !Join
-          - ','
+          - ","
           - !Ref AvailabilityZones
         VPCCidr: !FindInMap [Networks, Network0, VPCCidr]
         VPCName: !FindInMap [Networks, Network0, VPCName]
@@ -170,11 +170,11 @@ Resources:
   VPCNetwork1:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: network.template
+      TemplateURL: network.yaml
       TimeoutInMinutes: 20
       Parameters:
         AvailabilityZones: !Join
-          - ','
+          - ","
           - !Ref AvailabilityZones
         VPCCidr: !FindInMap [Networks, Network1, VPCCidr]
         VPCName: !FindInMap [Networks, Network1, VPCName]
@@ -184,7 +184,7 @@ Resources:
   VPCPeering:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: peering.template
+      TemplateURL: peering.yaml
       TimeoutInMinutes: 20
       Parameters:
         VPC0: !GetAtt VPCNetwork0.Outputs.VpcID
@@ -199,32 +199,32 @@ Resources:
   PeeringDNSConf:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: peering-dns-conf.template
+      TemplateURL: peering-dns-conf.yaml
       TimeoutInMinutes: 10
       Parameters:
         VpcPeeringId: !GetAtt VPCPeering.Outputs.VpcPeeringId
 
-  RDSSQL:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: rds-sql.template
-      TimeoutInMinutes: 30
-      Parameters:
-        DBUsername: !Ref Username
-        DBPassword: !Ref UserPassword # pragma: allowlist secret
-        Subnets: !GetAtt VPCNetwork1.Outputs.PublicSubnets
-        VPC: !GetAtt VPCNetwork1.Outputs.VpcID
-        OnPremCidr: !Ref OnPremCidr
-        DbInstanceclass: !Ref DbInstanceclass
-        Engine: !Ref Engine
-        EngineVersion: !Ref EngineVersion
+  # RDSSQL:
+  #   Type: AWS::CloudFormation::Stack
+  #   Properties:
+  #     TemplateURL: rds-sql.yaml
+  #     TimeoutInMinutes: 30
+  #     Parameters:
+  #       DBUsername: !Ref Username
+  #       DBPassword: !Ref UserPassword # pragma: allowlist secret
+  #       Subnets: !GetAtt VPCNetwork1.Outputs.PublicSubnets
+  #       VPC: !GetAtt VPCNetwork1.Outputs.VpcID
+  #       OnPremCidr: !Ref OnPremCidr
+  #       DbInstanceclass: !Ref DbInstanceclass
+  #       Engine: !Ref Engine
+  #       EngineVersion: !Ref EngineVersion
 
   EC2SQL:
     Type: AWS::CloudFormation::Stack
     DependsOn:
       - VPCPeering
     Properties:
-      TemplateURL: ec2-sql.template
+      TemplateURL: ec2-sql.yaml
       TimeoutInMinutes: 30
       Parameters:
         VPC: !GetAtt VPCNetwork0.Outputs.VpcID
@@ -234,8 +234,8 @@ Resources:
         Username: !Ref Username
         UserPassword: !Ref UserPassword # pragma: allowlist secret
         DBName: !Ref DBName
-        RDSEndpoint: !GetAtt RDSSQL.Outputs.Endpoint
-        RDSSecurityGroup: !GetAtt RDSSQL.Outputs.RDSSecurityGroup
+        # RDSEndpoint: !GetAtt RDSSQL.Outputs.Endpoint
+        # RDSSecurityGroup: !GetAtt RDSSQL.Outputs.RDSSecurityGroup
         OnPremCidr: !Ref OnPremCidr
         MSSQLVersion: !Ref MSSQLVersion
 
@@ -245,7 +245,7 @@ Resources:
       - DMSIAMRoles
       - VPCPeering
     Properties:
-      TemplateURL: dms.template
+      TemplateURL: dms.yaml
       TimeoutInMinutes: 20
       Parameters:
         VPC: !GetAtt VPCNetwork1.Outputs.VpcID
@@ -256,13 +256,13 @@ Resources:
         Target: !GetAtt RDSSQL.Outputs.Endpoint
         Username: !Ref Username
         WindowsSQLSecurityGroup: !GetAtt EC2SQL.Outputs.WindowsSQLSecurityGroup
-        RDSSecurityGroup: !GetAtt RDSSQL.Outputs.RDSSecurityGroup
+        # RDSSecurityGroup: !GetAtt RDSSQL.Outputs.RDSSecurityGroup
         DMSInstanceClass: !Ref DMSInstanceClass
 
   DmsTaskConf:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: dms-task-conf.template
+      TemplateURL: dms-task-conf.yaml
       TimeoutInMinutes: 10
       Parameters:
         ReplicationInstanceArn: !GetAtt DMSReplication.Outputs.ReplicationInstanceArn
@@ -272,5 +272,5 @@ Outputs:
   EC2SQLServerEip:
     Value: !GetAtt EC2SQL.Outputs.ElasticIP
 
-  RDSSQLEndpoint:
-    Value: !GetAtt RDSSQL.Outputs.Endpoint
+  # RDSSQLEndpoint:
+  #   Value: !GetAtt RDSSQL.Outputs.Endpoint

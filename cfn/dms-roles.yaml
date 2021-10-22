@@ -30,7 +30,13 @@ Resources:
                 - iam:AttachRolePolicy
                 - iam:DetachRolePolicy
                 - iam:DeletePolicy
-              Resource: '*'
+              Resource: "*"
+            - Effect: Allow
+              Action:
+                - kinesis:PutRecord
+                - kinesis:PutRecords
+                - kinesis:DescribeStream
+              Resource: "*"
 
   DMSIAMRoles:
     Type: Custom::DMSIAMRole

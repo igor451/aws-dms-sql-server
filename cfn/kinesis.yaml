@@ -1,0 +1,13 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: Creates kinesis streams to act as a target for AWS Database Migration Service
+
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+  KinesisStream:
+    Type: "AWS::Kinesis::Stream"
+    Properties:
+      Name: DMS-Target-Stream
+      RetentionPeriodHours: 24
+      ShardCount: 1

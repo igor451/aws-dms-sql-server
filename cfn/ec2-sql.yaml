@@ -25,12 +25,12 @@ Parameters:
   DBName:
     Type: String
 
-  RDSEndpoint:
-    Type: String
+  # RDSEndpoint:
+  #   Type: String
 
-  RDSSecurityGroup:
-    Description: RDS Security Group ID.
-    Type: AWS::EC2::SecurityGroup::Id
+  # RDSSecurityGroup:
+  #   Description: RDS Security Group ID.
+  #   Type: AWS::EC2::SecurityGroup::Id
 
   OnPremCidr:
     Type: String
@@ -51,35 +51,35 @@ Resources:
         - Key: Name
           Value: windows-sql-sg
 
-  RDPtoEC2SQLSecurityGroupIngress:
-    Type: AWS::EC2::SecurityGroupIngress
-    Properties:
-      CidrIp: !Ref OnPremCidr
-      Description: rdp-from-on-prem
-      FromPort: 3389
-      GroupId: !Ref WindowsSQLSecurityGroup
-      IpProtocol: tcp
-      ToPort: 3389
+  # RDPtoEC2SQLSecurityGroupIngress:
+  #   Type: AWS::EC2::SecurityGroupIngress
+  #   Properties:
+  #     CidrIp: !Ref OnPremCidr
+  #     Description: rdp-from-on-prem
+  #     FromPort: 3389
+  #     GroupId: !Ref WindowsSQLSecurityGroup
+  #     IpProtocol: tcp
+  #     ToPort: 3389
 
-  SQLtoEC2SQLSecurityGroupIngress:
-    Type: AWS::EC2::SecurityGroupIngress
-    Properties:
-      CidrIp: !Ref OnPremCidr
-      Description: sql-from-on-prem
-      FromPort: 1433
-      GroupId: !Ref WindowsSQLSecurityGroup
-      IpProtocol: tcp
-      ToPort: 1433
+  # SQLtoEC2SQLSecurityGroupIngress:
+  #   Type: AWS::EC2::SecurityGroupIngress
+  #   Properties:
+  #     CidrIp: !Ref OnPremCidr
+  #     Description: sql-from-on-prem
+  #     FromPort: 1433
+  #     GroupId: !Ref WindowsSQLSecurityGroup
+  #     IpProtocol: tcp
+  #     ToPort: 1433
 
-  EC2toRDSSecurityGroupIngress:
-    Type: AWS::EC2::SecurityGroupIngress
-    Properties:
-      Description: ec2-sg
-      FromPort: 1433
-      GroupId: !Ref RDSSecurityGroup
-      IpProtocol: tcp
-      SourceSecurityGroupId: !Ref WindowsSQLSecurityGroup
-      ToPort: 1433
+  # EC2toRDSSecurityGroupIngress:
+  #   Type: AWS::EC2::SecurityGroupIngress
+  #   Properties:
+  #     Description: ec2-sg
+  #     FromPort: 1433
+  #     GroupId: !Ref RDSSecurityGroup
+  #     IpProtocol: tcp
+  #     SourceSecurityGroupId: !Ref WindowsSQLSecurityGroup
+  #     ToPort: 1433
 
   EIP:
     Type: AWS::EC2::EIP
@@ -199,38 +199,38 @@ Resources:
                     @distribution_db=@distributionDB,
                     @security_mode = 1;
                 GO
-            C:\\cfn\\scripts\\create_rds_db.ps1:
-              content: !Sub |
-                $RDSSQLInstance = "${RDSEndpoint}"
-                $RDSSQLUser = "${Username}"
-                $RDSSQLPassword = "${UserPassword}"
-                $DBName = "${DBName}"
-                # Checking to see if the SqlServer module is already installed.
-                $SQLModuleCheck = Get-Module -ListAvailable SqlServer
-                if ($null -eq $SQLModuleCheck) {
-                write-host "SqlServer Module Not Found - Installing..."
-                Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
-                Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
-                # Installing module
-                Install-Module -Name SqlServer -Confirm:$false -AllowClobber -Force
-                }
-                Import-Module SqlServer
-                # Creating SQL Query to create database
-                $SQLDBQuery = "CREATE DATABASE $DBName"
-                # Running the SQL Query, setting result of query to $False if any errors caught
-                Try {
-                $SQLDBResult = $null
-                $SQLDBResult = Invoke-SqlCmd -Query $SQLDBQuery -ServerInstance $RDSSQLInstance -Username $RDSSQLUser -Password $RDSSQLPassword
-                $SQLQuerySuccess = $TRUE
-                }
-                Catch {
-                $SQLQuerySuccess = $FALSE
-                }
-                # Output of the results in cfn/logs
-                "SQLInstance: $RDSSQLInstance"
-                "SQLQueryResult: $SQLQuerySuccess"
-                "SQLQueryOutput:"
-                $SQLDBResult
+            # C:\\cfn\\scripts\\create_rds_db.ps1:
+            #   content: !Sub |
+            #     $RDSSQLInstance = "${RDSEndpoint}"
+            #     $RDSSQLUser = "${Username}"
+            #     $RDSSQLPassword = "${UserPassword}"
+            #     $DBName = "${DBName}"
+            #     # Checking to see if the SqlServer module is already installed.
+            #     $SQLModuleCheck = Get-Module -ListAvailable SqlServer
+            #     if ($null -eq $SQLModuleCheck) {
+            #     write-host "SqlServer Module Not Found - Installing..."
+            #     Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force
+            #     Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+            #     # Installing module
+            #     Install-Module -Name SqlServer -Confirm:$false -AllowClobber -Force
+            #     }
+            #     Import-Module SqlServer
+            #     # Creating SQL Query to create database
+            #     $SQLDBQuery = "CREATE DATABASE $DBName"
+            #     # Running the SQL Query, setting result of query to $False if any errors caught
+            #     Try {
+            #     $SQLDBResult = $null
+            #     $SQLDBResult = Invoke-SqlCmd -Query $SQLDBQuery -ServerInstance $RDSSQLInstance -Username $RDSSQLUser -Password $RDSSQLPassword
+            #     $SQLQuerySuccess = $TRUE
+            #     }
+            #     Catch {
+            #     $SQLQuerySuccess = $FALSE
+            #     }
+            #     # Output of the results in cfn/logs
+            #     "SQLInstance: $RDSSQLInstance"
+            #     "SQLQueryResult: $SQLQuerySuccess"
+            #     "SQLQueryOutput:"
+            #     $SQLDBResult
           commands:
             01-create-os-user:
               command: !Sub |

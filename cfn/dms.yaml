@@ -36,6 +36,13 @@ Parameters:
     Type: String
 
 Resources:
+  KinesisStream:
+    Type: "AWS::Kinesis::Stream"
+    Properties:
+      Name: DMS-Target-Stream
+      RetentionPeriodHours: 24
+      ShardCount: 1
+
   DMSSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -55,15 +62,15 @@ Resources:
       SourceSecurityGroupId: !Ref DMSSecurityGroup
       ToPort: 1433
 
-  DMStoRDSSecurityGroupIngress:
-    Type: AWS::EC2::SecurityGroupIngress
-    Properties:
-      Description: dms-sg
-      FromPort: 1433
-      GroupId: !Ref RDSSecurityGroup
-      IpProtocol: tcp
-      SourceSecurityGroupId: !Ref DMSSecurityGroup
-      ToPort: 1433
+  # DMStoRDSSecurityGroupIngress:
+  #   Type: AWS::EC2::SecurityGroupIngress
+  #   Properties:
+  #     Description: dms-sg
+  #     FromPort: 1433
+  #     GroupId: !Ref RDSSecurityGroup
+  #     IpProtocol: tcp
+  #     SourceSecurityGroupId: !Ref DMSSecurityGroup
+  #     ToPort: 1433
 
   ReplicationSubnetGroup:
     Type: AWS::DMS::ReplicationSubnetGroup
@@ -87,7 +94,7 @@ Resources:
       ReplicationInstanceArn: !Ref ReplicationInstance
       SourceEndpointArn: !Ref SourceEndpoint
       TableMappings: '{"rules": [{"rule-type": "selection", "rule-id": "1", "rule-action": "include", "object-locator": {"schema-name": "%", "table-name": "%"}, "rule-name": "1"}]}'
-      TargetEndpointArn: !Ref TargetEndpoint
+      TargetEndpointArn: !Ref KinesisStream
 
   SourceEndpoint:
     Type: AWS::DMS::Endpoint
@@ -100,16 +107,16 @@ Resources:
       ServerName: !Ref Source
       Username: !Ref Username
 
-  TargetEndpoint:
-    Type: AWS::DMS::Endpoint
-    Properties:
-      DatabaseName: !Ref Database
-      EndpointType: target
-      EngineName: sqlserver
-      Password: !Ref DBPassword #pragma: allowlist secret
-      Port: 1433
-      ServerName: !Ref Target
-      Username: !Ref Username
+  # TargetEndpoint:
+  #   Type: AWS::DMS::Endpoint
+  #   Properties:
+  #     DatabaseName: !Ref Database
+  #     EndpointType: target
+  #     EngineName: sqlserver
+  #     Password: !Ref DBPassword #pragma: allowlist secret
+  #     Port: 1433
+  #     ServerName: !Ref Target
+  #     Username: !Ref Username
 
 Outputs:
   ReplicationInstanceArn:
