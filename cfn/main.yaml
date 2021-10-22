@@ -204,21 +204,6 @@ Resources:
       Parameters:
         VpcPeeringId: !GetAtt VPCPeering.Outputs.VpcPeeringId
 
-  # RDSSQL:
-  #   Type: AWS::CloudFormation::Stack
-  #   Properties:
-  #     TemplateURL: rds-sql.yaml
-  #     TimeoutInMinutes: 30
-  #     Parameters:
-  #       DBUsername: !Ref Username
-  #       DBPassword: !Ref UserPassword # pragma: allowlist secret
-  #       Subnets: !GetAtt VPCNetwork1.Outputs.PublicSubnets
-  #       VPC: !GetAtt VPCNetwork1.Outputs.VpcID
-  #       OnPremCidr: !Ref OnPremCidr
-  #       DbInstanceclass: !Ref DbInstanceclass
-  #       Engine: !Ref Engine
-  #       EngineVersion: !Ref EngineVersion
-
   EC2SQL:
     Type: AWS::CloudFormation::Stack
     DependsOn:
